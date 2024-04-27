@@ -1,0 +1,10 @@
+[project]
+name = "chromadb_etl"
+version = "0.1"
+dependencies = [
+   "neo4j",
+   "retry"
+]
+
+[project.optional-dependencies]
+dev = ["black", "flake8"]

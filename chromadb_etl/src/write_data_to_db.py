@@ -8,8 +8,8 @@ import PyPDF2
 import os
 import shutil
 
-CHROMA_PATH = "../chroma"
-DATA_PATH = "../data/"
+CHROMA_PATH = "../../chroma"
+DATA_PATH = "../../data/"
 
 
 def main():
