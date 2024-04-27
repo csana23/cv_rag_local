@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Run any setup steps or pre-processing tasks here
-echo "Starting CV chatbot frontend..."
+echo "Running ETL to move CV data from pdf to chromadb..."
 
 # Run the ETL script
-streamlit run main.py
+python write_data_to_db.py

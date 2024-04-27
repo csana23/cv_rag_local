@@ -1,0 +1,10 @@
+anyio
+certifi
+charset-normalizer
+h11
+httpcore
+httpx
+idna
+requests
+sniffio
+urllib3

@@ -3,7 +3,7 @@ name = "chatbot_api"
 version = "0.1"
 dependencies = [
     "asyncio",
-    "fastapi",
+    "fastapi[all]",
     "langchain",
     "langchain-openai",
     "langchain-community",
