@@ -3,7 +3,11 @@ name = "chromadb_etl"
 version = "0.1"
 dependencies = [
    "PyPDF2",
-   "retry"
+   "retry",
+   "langchain_community",
+   "langchain",
+   "langchain_openai"
+
 ]
 
 [project.optional-dependencies]

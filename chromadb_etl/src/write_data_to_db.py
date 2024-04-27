@@ -8,9 +8,8 @@ import PyPDF2
 import os
 import shutil
 
-CHROMA_PATH = "../../chroma"
-DATA_PATH = "../../data/"
-
+CHROMA_PATH = os.path.join(os.getcwd(), "../../chroma")
+DATA_PATH = os.path.join(os.getcwd(), "../../data")
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)

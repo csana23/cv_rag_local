@@ -1,6 +1,6 @@
 # chatbot_api/Dockerfile
 
-FROM python:3.12-slim
+FROM python:3.12-bookworm
 
 WORKDIR /app
 COPY ./src/ /app
