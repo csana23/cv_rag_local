@@ -8,12 +8,39 @@ import PyPDF2
 import os
 import shutil
 
-CHROMA_PATH = os.path.join(os.getcwd(), "../../chroma")
-DATA_PATH = os.path.join(os.getcwd(), "../../data")
+# CHROMA_PATH = os.path.join(os.getcwd(), "../../chroma")
+# DATA_PATH = os.path.join(os.getcwd(), "../../data")
+
+CHROMA_PATH = "chroma"
+DATA_PATH = "data"
+# SRC_PATH = "app/src"
+# FILE_PATH = "write_data_to_db.py"
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)
     generate_data_store()
+    # check_folder_exists(SRC_PATH)
+    # print(os.getcwd())
+    # print(get_files_in_directory(os.getcwd()))
+
+def get_files_in_directory(directory):
+    files = []
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        files.append(file_path)
+    return files
+
+def check_folder_exists(folder_path):
+    if os.path.exists(folder_path):
+        print(f"The folder '{folder_path}' exists.")
+    else:
+        print(f"The folder '{folder_path}' does not exist.")
+
+def check_file_exists(file_path):
+    if os.path.exists(file_path):
+        print(f"The file '{file_path}' exists.")
+    else:
+        print(f"The file '{file_path}' does not exist.")
 
 def generate_data_store():
     documents = load_documents()

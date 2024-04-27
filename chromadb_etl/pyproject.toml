@@ -6,8 +6,9 @@ dependencies = [
    "retry",
    "langchain_community",
    "langchain",
-   "langchain_openai"
-
+   "langchain_openai",
+   "unstructured",
+   "chromadb"
 ]
 
 [project.optional-dependencies]

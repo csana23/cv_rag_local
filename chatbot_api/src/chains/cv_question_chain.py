@@ -12,7 +12,10 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
-persist_directory = "../../../chroma/"
+persist_directory = "chroma"
+
+print("this is from the chain")
+print(os.getcwd())
 
 vector_db = Chroma(
     persist_directory=persist_directory,
