@@ -8,5 +8,5 @@ COPY ./src/ /app
 COPY ./pyproject.toml /code/pyproject.toml
 RUN pip install /code/.
 
-EXPOSE 8000
+EXPOSE 8005
 CMD ["sh", "entrypoint.sh"]

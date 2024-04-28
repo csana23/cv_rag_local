@@ -1,9 +1,29 @@
 services:
+  chromadb:
+    image: chromadb/chroma:latest
+    volumes:
+      - ./chromadb:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ALLOW_RESET=TRUE
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - default
+
   chromadb_etl:
     build:
       context: ./chromadb_etl
     env_file:
       - .env
+    depends_on:
+      chromadb:
+        condition: service_healthy
 
   chatbot_api:
     build:
@@ -11,9 +31,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - chromadb_etl
+      chromadb_etl:
+        condition: service_completed_successfully
     ports:
-      - "8000:8000"
+      - "8005:8005"
 
   chatbot_frontend:
     build:

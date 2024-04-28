@@ -1,32 +1,48 @@
 import os
 
 from langchain.chains import RetrievalQA
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain import hub
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     PromptTemplate,
     SystemMessagePromptTemplate,
 )
-from langchain_chroma import Chroma
+# from langchain_chroma import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+import chromadb
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
-persist_directory = "chroma"
+client = chromadb.HttpClient(host="host.docker.internal", port=8000)
+
+print("listing chromadb collections from chain:", client.list_collections())
+
+# persist_directory = "chroma"
 
 print("this is from the chain")
 print(os.getcwd())
 
+'''
 vector_db = Chroma(
     persist_directory=persist_directory,
     embedding_function=OpenAIEmbeddings()
 )
+'''
 
-question_template = """Your job is to use resumes 
-provided in the data folder to answer questions about their contents.
-Use the following context to answer the questions.
+vector_db = Chroma(
+    client=client,
+    collection_name="resume_collection",
+    embedding_function=OpenAIEmbeddings()
+)
+
+question_template = """Your sole job is to answer questions about resumes.
+Use only the following context to answer the questions.
 Be as detailed as possible in your responses but don't make up any information that is not
-from the context. If you don't know the answer, say you don't know.
+from the context. If you don't know the answer, say you don't know. You are not permitted to make up information.
 {context}
 """
 
@@ -42,9 +58,24 @@ question_human_prompt = HumanMessagePromptTemplate(
     )
 )
 
+messages=[question_system_prompt, question_human_prompt]
+
 question_prompt = ChatPromptTemplate(
-    input_variables=["context", "question"], messages=[question_system_prompt, question_human_prompt]
+    input_variables=["context", "question"], messages=messages
 )
+
+'''
+retrieval_qa_chat_prompt = hub.pull("langchain-ai/retrieval-qa-chat")
+combine_docs_chain = create_stuff_documents_chain(
+    llm=ChatOpenAI(model=AGENT_MODEL, temperature=0),
+    prompt=question_prompt
+)
+
+question_vector_chain = create_retrieval_chain(
+    retriever=vector_db.as_retriever(k=3),
+    combine_docs_chain=combine_docs_chain
+)
+'''
 
 question_vector_chain = RetrievalQA.from_chain_type(
     llm=ChatOpenAI(model=AGENT_MODEL, temperature=0),
@@ -53,3 +84,5 @@ question_vector_chain = RetrievalQA.from_chain_type(
 )
 
 question_vector_chain.combine_documents_chain.llm_chain.prompt = question_prompt
+
+

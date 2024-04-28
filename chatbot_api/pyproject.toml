@@ -5,6 +5,7 @@ dependencies = [
     "asyncio",
     "fastapi[all]",
     "langchain",
+    "langchain-core",
     "langchain-openai",
     "langchain-community",
     "langchainhub",

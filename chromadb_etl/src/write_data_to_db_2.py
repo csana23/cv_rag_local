@@ -4,10 +4,6 @@ from langchain.schema import Document
 # from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain.vectorstores.chroma import Chroma
-import chromadb
-from chromadb.config import Settings
-from chromadb.utils import embedding_functions
-import uuid
 import PyPDF2
 import os
 import shutil
@@ -16,7 +12,7 @@ import shutil
 # DATA_PATH = os.path.join(os.getcwd(), "../../data")
 
 CHROMA_PATH = "chroma"
-DATA_PATH = "data"
+DATA_PATH = "../data"
 # SRC_PATH = "app/src"
 # FILE_PATH = "write_data_to_db.py"
 
@@ -92,22 +88,6 @@ def split_text(documents: list[Document]):
 
 
 def save_to_chroma(chunks: list[Document]):
-    client = chromadb.HttpClient(host="host.docker.internal", port=8000, settings=Settings(allow_reset=True))
-    client.reset()
-    
-    embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=os.getenv("OPENAI_API_KEY"))
-    collection = client.create_collection("resume_collection", embedding_function=embedding_function)
-    
-    for chunk in chunks:
-        collection.add(
-            ids=[str(uuid.uuid4())], metadatas=chunk.metadata, documents=chunk.page_content
-        )
-
-    print(f"Saved {len(chunks)} chunks to chromadb instance.")
-    
-
-
-    '''
     # Clear out the database first.
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
@@ -118,8 +98,6 @@ def save_to_chroma(chunks: list[Document]):
     )
     db.persist()
     print(f"Saved {len(chunks)} chunks to {CHROMA_PATH}.")
-    '''
-
 
 
 if __name__ == "__main__":

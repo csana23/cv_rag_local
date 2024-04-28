@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 
 CHATBOT_URL = os.getenv(
-    "CHATBOT_URL", "http://localhost:8000/cv-rag-agent"
+    "CHATBOT_URL", "http://localhost:8005/cv-rag-agent"
 )
 
 with st.sidebar:
