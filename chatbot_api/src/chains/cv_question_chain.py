@@ -80,7 +80,7 @@ question_vector_chain = create_retrieval_chain(
 question_vector_chain = RetrievalQA.from_chain_type(
     llm=ChatOpenAI(model=AGENT_MODEL, temperature=0),
     chain_type="stuff",
-    retriever=vector_db.as_retriever(k=3)
+    retriever=vector_db.as_retriever(k=5)
 )
 
 question_vector_chain.combine_documents_chain.llm_chain.prompt = question_prompt

@@ -76,7 +76,7 @@ def load_documents():
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300,
+        chunk_size=600,
         chunk_overlap=100,
         length_function=len,
         add_start_index=True,
@@ -84,7 +84,7 @@ def split_text(documents: list[Document]):
     chunks = text_splitter.split_documents(documents)
     print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
 
-    document = chunks[10]
+    document = chunks[0]
     print(document.page_content)
     print(document.metadata)
 

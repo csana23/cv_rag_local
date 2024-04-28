@@ -18,7 +18,10 @@ DATA_PATH = "../data"
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)
-    generate_data_store()
+    chunks = split_text(load_documents())
+
+    print(chunks)
+    # generate_data_store()
     # check_folder_exists(SRC_PATH)
     # print(os.getcwd())
     # print(get_files_in_directory(os.getcwd()))
@@ -72,7 +75,7 @@ def load_documents():
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300,
+        chunk_size=1000,
         chunk_overlap=100,
         length_function=len,
         add_start_index=True,
@@ -80,7 +83,7 @@ def split_text(documents: list[Document]):
     chunks = text_splitter.split_documents(documents)
     print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
 
-    document = chunks[10]
+    document = chunks[0]
     print(document.page_content)
     print(document.metadata)
 
