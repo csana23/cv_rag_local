@@ -63,6 +63,7 @@ def convert_pdf_to_txt(input_file, output_file):
 def convert_all_pdfs_to_txt(folder_path):
     pdf_files = [file for file in os.listdir(folder_path) if file.endswith(".pdf")]
     for pdf_file in pdf_files:
+        print(str(pdf_file))
         pdf_path = os.path.join(folder_path, pdf_file)
         txt_file = os.path.splitext(pdf_file)[0] + ".txt"
         txt_path = os.path.join(folder_path, txt_file)

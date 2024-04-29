@@ -59,6 +59,7 @@ cover/
 chroma/
 cv_rag/chromadb_etl/src/chroma
 chromadb/
+chromadb_etl/data/
 
 # Django stuff:
 *.log
