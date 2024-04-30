@@ -134,6 +134,7 @@ ENV/
 env.bak/
 venv.bak/
 cv_rag_env/
+cv_rag_local_env/
 
 # Spyder project settings
 .spyderproject

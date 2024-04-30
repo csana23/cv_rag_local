@@ -12,7 +12,9 @@ from langchain.prompts import (
     SystemMessagePromptTemplate,
 )
 from langchain_community.vectorstores import Chroma
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+# from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.llms import Ollama
 import dotenv
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -50,23 +52,25 @@ review_prompt_template = ChatPromptTemplate(
     messages=messages,
 )
 
-chat_model = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+# chat_model = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+
+chat_model = Ollama(model="phi3")
 
 vector_db = Chroma(
     persist_directory=CHROMA_PATH,
-    embedding_function=OpenAIEmbeddings(),
+    embedding_function=OllamaEmbeddings(model="phi3"),
 )
 
-retriever = vector_db.as_retriever(k=5)
+retriever = vector_db.as_retriever(k=3)
 
 review_chain = (
     {"context": retriever, "question": RunnablePassthrough()}
-    |  review_prompt_template
+    | review_prompt_template
     | chat_model
     | StrOutputParser()
 )
 
-question = "Did Richard Csanaki complete his MSc studies?"
+question = "Did Richard Csanaki join the French Foreign Legion?"
 
 print(review_chain.invoke(question))
 

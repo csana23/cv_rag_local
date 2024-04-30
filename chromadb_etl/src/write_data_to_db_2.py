@@ -2,7 +2,8 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 # from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
 from langchain.vectorstores.chroma import Chroma
 import PyPDF2
 import os
@@ -18,10 +19,7 @@ DATA_PATH = "../data"
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)
-    chunks = split_text(load_documents())
-
-    print(chunks)
-    # generate_data_store()
+    generate_data_store()
     # check_folder_exists(SRC_PATH)
     # print(os.getcwd())
     # print(get_files_in_directory(os.getcwd()))
@@ -97,7 +95,7 @@ def save_to_chroma(chunks: list[Document]):
 
     # Create a new DB from the documents.
     db = Chroma.from_documents(
-        chunks, OpenAIEmbeddings(), persist_directory=CHROMA_PATH
+        chunks, OllamaEmbeddings(model="phi3"), persist_directory=CHROMA_PATH
     )
     db.persist()
     print(f"Saved {len(chunks)} chunks to {CHROMA_PATH}.")
