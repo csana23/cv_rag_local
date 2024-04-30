@@ -98,7 +98,7 @@ def save_to_chroma(chunks: list[Document]):
     client.reset()
     
     # embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=os.getenv("OPENAI_API_KEY"))
-    embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://localhost:11434", model_name=os.getenv("AGENT_MODEL"))
+    embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://host.docker.internal:11434", model_name=os.getenv("AGENT_MODEL"))
     collection = client.create_collection("resume_collection", embedding_function=embedding_function)
 
     ollama_client = ollama.Client(host="http://host.docker.internal:11434")

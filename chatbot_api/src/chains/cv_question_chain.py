@@ -12,8 +12,10 @@ from langchain.prompts import (
 )
 # from langchain_chroma import Chroma
 from langchain_community.vectorstores import Chroma
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+# from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.llms import Ollama
 import chromadb
+from chromadb.utils import embedding_functions
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
@@ -26,17 +28,12 @@ print("listing chromadb collections from chain:", client.list_collections())
 print("this is from the chain")
 print(os.getcwd())
 
-'''
-vector_db = Chroma(
-    persist_directory=persist_directory,
-    embedding_function=OpenAIEmbeddings()
-)
-'''
+embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://localhost:11434", model_name=os.getenv("AGENT_MODEL"))
 
 vector_db = Chroma(
     client=client,
     collection_name="resume_collection",
-    embedding_function=OpenAIEmbeddings()
+    embedding_function=embedding_function
 )
 
 question_template = """Your sole job is to answer questions about resumes.
@@ -78,9 +75,9 @@ question_vector_chain = create_retrieval_chain(
 '''
 
 question_vector_chain = RetrievalQA.from_chain_type(
-    llm=ChatOpenAI(model=AGENT_MODEL, temperature=0),
+    llm=Ollama(model=AGENT_MODEL, temperature=0),
     chain_type="stuff",
-    retriever=vector_db.as_retriever(k=5)
+    retriever=vector_db.as_retriever(k=3)
 )
 
 question_vector_chain.combine_documents_chain.llm_chain.prompt = question_prompt

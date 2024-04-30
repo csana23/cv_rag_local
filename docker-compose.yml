@@ -10,11 +10,39 @@ services:
       - 8000:8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 3
     networks:
       - default
+
+  ollama:
+    volumes:
+      - ./ollama/ollama:/root/.ollama
+    container_name: ollama
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    networks:
+      - default
+    healthcheck:
+      test: ollama --version || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      chromadb:
+        condition: service_healthy
 
   chromadb_etl:
     build:
@@ -23,6 +51,8 @@ services:
       - .env
     depends_on:
       chromadb:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
 
   chatbot_api:

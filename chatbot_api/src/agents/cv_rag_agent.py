@@ -3,25 +3,13 @@ import os
 from chains.cv_question_chain import question_vector_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain import hub
-from langchain.agents import AgentExecutor, Tool, create_openai_functions_agent
-from langchain_openai import ChatOpenAI
+from langchain.agents import AgentExecutor, Tool, create_tool_calling_agent
+# from langchain_openai import ChatOpenAI
+from langchain_community.llms import Ollama
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
 cv_rag_agent_prompt = hub.pull("hwchase17/openai-functions-agent")
-
-'''
-cv_rag_agent_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "Answer any use questions based solely on the context below: {context}"),
-        MessagesPlaceholder("chat_history", optional=True),
-        ("human", "{input}"),
-        MessagesPlaceholder("agent_scratchpad"),
-    ]
-)
-'''
-
-
 
 tools = [
     Tool(
@@ -38,12 +26,12 @@ tools = [
     )
 ]
 
-chat_model = ChatOpenAI(
+chat_model = Ollama(
     model=AGENT_MODEL,
     temperature=0,
 )
 
-cv_rag_agent = create_openai_functions_agent(
+cv_rag_agent = create_tool_calling_agent(
     llm=chat_model,
     prompt=cv_rag_agent_prompt,
     tools=tools,
