@@ -5,6 +5,4 @@ class CVQueryInput(BaseModel):
 
 
 class CVQueryOutput(BaseModel):
-    input: str
-    output: str
-    intermediate_steps: list[str]
+    text: str

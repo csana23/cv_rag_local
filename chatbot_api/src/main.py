@@ -18,7 +18,7 @@ async def invoke_agent_with_retry(query: str):
     """
 
     # return await cv_rag_agent_executor.ainvoke({"input": query})
-    return await question_vector_chain.invoke({"question": query}) 
+    return await question_vector_chain.invoke(query) 
 
 
 @app.get("/")
@@ -30,8 +30,5 @@ async def get_status():
 async def query_cv_agent(query: CVQueryInput) -> CVQueryOutput:
     query_response = await invoke_agent_with_retry(query.text)
     print("query_response", query_response)
-    query_response["intermediate_steps"] = [
-        str(s) for s in query_response["intermediate_steps"]
-    ]
 
     return query_response
