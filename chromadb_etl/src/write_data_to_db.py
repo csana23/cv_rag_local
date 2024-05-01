@@ -98,18 +98,24 @@ def save_to_chroma(chunks: list[Document]):
     client.reset()
     
     # embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=os.getenv("OPENAI_API_KEY"))
-    embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://localhost:11434", model_name=os.getenv("AGENT_MODEL"))
-    collection = client.create_collection("resume_collection", embedding_function=embedding_function)
+    # embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://localhost:11434", model_name=os.getenv("AGENT_MODEL"))
+    collection = client.create_collection("resume_collection")
 
     ollama_client = ollama.Client(host="http://host.docker.internal:11434")
+
+    # check if phi3 is already pulled
+    models = [model['name'] for model in ollama_client.list()['models']]
+
+    if 'phi3:latest' not in models:
+        ollama_client.pull(model="phi3")
     
     for chunk in chunks:
         # embed using ollama
-        # response = ollama_client.embeddings(model="phi3", prompt=chunk.page_content)
-        # embedding = response["embedding"]
+        response = ollama_client.embeddings(model="phi3", prompt=chunk.page_content)
+        embedding = response["embedding"]
 
         collection.add(
-            ids=[str(uuid.uuid4())], metadatas=chunk.metadata, documents=chunk.page_content 
+            ids=[str(uuid.uuid4())], metadatas=chunk.metadata, embeddings=[embedding], documents=chunk.page_content 
         )
 
     print(f"Saved {len(chunks)} chunks to chromadb instance.")

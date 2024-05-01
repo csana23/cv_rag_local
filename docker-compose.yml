@@ -26,8 +26,6 @@ services:
     image: ollama/ollama:latest
     ports:
       - 11434:11434
-    networks:
-      - default
     healthcheck:
       test: ollama --version || exit 1
       interval: 10s

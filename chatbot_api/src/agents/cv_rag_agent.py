@@ -27,6 +27,7 @@ tools = [
 ]
 
 chat_model = Ollama(
+    base_url="http://host.docker.internal:11434",
     model=AGENT_MODEL,
     temperature=0,
 )

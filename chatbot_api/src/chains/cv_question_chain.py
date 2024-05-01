@@ -14,8 +14,9 @@ from langchain.prompts import (
 from langchain_community.vectorstores import Chroma
 # from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.llms import Ollama
+from langchain_community.embeddings import OllamaEmbeddings
 import chromadb
-from chromadb.utils import embedding_functions
+from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
@@ -28,7 +29,7 @@ print("listing chromadb collections from chain:", client.list_collections())
 print("this is from the chain")
 print(os.getcwd())
 
-embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://localhost:11434", model_name=os.getenv("AGENT_MODEL"))
+embedding_function = OllamaEmbeddingFunction(url="http://host.docker.internal:11434", model_name=os.getenv("AGENT_MODEL"))
 
 vector_db = Chroma(
     client=client,
@@ -75,7 +76,7 @@ question_vector_chain = create_retrieval_chain(
 '''
 
 question_vector_chain = RetrievalQA.from_chain_type(
-    llm=Ollama(model=AGENT_MODEL, temperature=0),
+    llm=Ollama(base_url="http://host.docker.internal:11434", model=AGENT_MODEL, temperature=0),
     chain_type="stuff",
     retriever=vector_db.as_retriever(k=3)
 )
