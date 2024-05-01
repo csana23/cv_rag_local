@@ -27,9 +27,7 @@ async def get_status():
 
 
 @app.post("/cv-rag-agent")
-async def query_cv_agent(
-    query: CVQueryInput,
-) -> CVQueryOutput:
+async def query_cv_agent(query: CVQueryInput) -> CVQueryOutput:
     query_response = await invoke_agent_with_retry(query.text)
     print("query_response", query_response)
     query_response["intermediate_steps"] = [
