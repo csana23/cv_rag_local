@@ -6,7 +6,6 @@ dependencies = [
    "retry",
    "langchain_community",
    "langchain",
-   "langchain_openai",
    "unstructured",
    "chromadb",
    "ollama"

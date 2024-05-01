@@ -1,8 +1,6 @@
 from langchain_community.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-# from langchain_community.embeddings import HuggingFaceEmbeddings
-# from langchain_openai import OpenAIEmbeddings
 from langchain.vectorstores.chroma import Chroma
 import chromadb
 from chromadb.config import Settings
@@ -107,6 +105,7 @@ def save_to_chroma(chunks: list[Document]):
     models = [model['name'] for model in ollama_client.list()['models']]
 
     if 'phi3:latest' not in models:
+        print("model does not exist, pulling from ollama")
         ollama_client.pull(model="phi3")
     
     for chunk in chunks:
