@@ -20,9 +20,7 @@ from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
-url = "127.0.0.1" if os.getenv("LOCAL") == "yes" else "host.docker.internal"
-
-client = chromadb.HttpClient(host=url, port=8000)
+client = chromadb.HttpClient(host="host.docker.internal", port=8000)
 
 print("listing chromadb collections from chain:", client.list_collections())
 
@@ -32,7 +30,7 @@ print("this is from the chain")
 print(os.getcwd())
 
 # embedding_function = OllamaEmbeddingFunction(url="http://host.docker.internal:11434", model_name=os.getenv("AGENT_MODEL"))
-embedding_function = OllamaEmbeddings(base_url="http://" + url + ":11434", model="phi3")
+embedding_function = OllamaEmbeddings(base_url="http://host.docker.internal:11434", model="phi3")
 
 vector_db = Chroma(
     client=client,
@@ -40,7 +38,7 @@ vector_db = Chroma(
     embedding_function=embedding_function
 )
 
-llm = Ollama(base_url="http://" + url + ":11434", model="phi3", keep_alive="-1", temperature=0.0)
+llm = Ollama(base_url="http://host.docker.internal:11434", model="phi3", keep_alive="-1", temperature=0.0)
 
 question_template = """Your job is to answer questions about CVs and resumes based on the below context.
 If the question or input is not related to CVs or resumes please let the user know.

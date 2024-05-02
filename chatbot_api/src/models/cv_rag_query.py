@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from langchain.schema import Document
 
 class CVQueryInput(BaseModel):

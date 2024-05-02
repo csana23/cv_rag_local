@@ -3,7 +3,8 @@ import os
 import requests
 import streamlit as st
 
-CHATBOT_URL = os.getenv("CHATBOT_LOCAL_URL") if os.getenv("LOCAL") == "yes" else os.getenv("CHATBOT_DOCKER_URL")
+# CHATBOT_URL = os.getenv("CHATBOT_LOCAL_URL") if os.getenv("LOCAL") == "yes" else os.getenv("CHATBOT_DOCKER_URL")
+CHATBOT_URL = os.getenv("CHATBOT_URL", "http://localhost:8005/cv-rag-agent")
 print("CHATBOT_URL", CHATBOT_URL)
 
 with st.sidebar:
