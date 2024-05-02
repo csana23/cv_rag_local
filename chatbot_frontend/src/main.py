@@ -27,7 +27,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    with st.chat_message(message["answer"]):
         if "answer" in message.keys():
             st.markdown(message["answer"])
 
@@ -41,9 +41,10 @@ if prompt := st.chat_input("What do you want to know?"):
     st.session_state.messages.append({"role": "user", "answer": prompt})
 
     data = {"text": prompt}
+    print("prompt:", prompt)
 
     with st.spinner("Searching for an answer..."):
-        response = requests.post(CHATBOT_URL, data=data)
+        response = requests.post(CHATBOT_URL, json=data)
 
         if response.status_code == 200:
             output_text = response.json()["answer"]
@@ -55,7 +56,7 @@ if prompt := st.chat_input("What do you want to know?"):
             context = output_text
 
     st.chat_message("assistant").markdown(output_text)
-    # st.status("How was this generated?", state="complete").info(explanation)
+    st.status("How was this generated?", state="complete").info(context)
 
     st.session_state.messages.append(
         {

@@ -20,7 +20,7 @@ from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
-url = "0.0.0.0" if os.getenv("LOCAL") == "yes" else "host.docker.internal"
+url = "127.0.0.1" if os.getenv("LOCAL") == "yes" else "host.docker.internal"
 
 client = chromadb.HttpClient(host=url, port=8000)
 
@@ -40,18 +40,11 @@ vector_db = Chroma(
     embedding_function=embedding_function
 )
 
-llm = Ollama(base_url="http://" + url + ":11434", model="phi3", keep_alive="-1")
+llm = Ollama(base_url="http://" + url + ":11434", model="phi3", keep_alive="-1", temperature=0.0)
 
-question_template = """Your sole job is to answer questions about resumes.
-Use only the following context to answer the questions.
-Be as detailed as possible in your responses but don't make up any information that is not
-from the context. If you don't know the answer, say you don't know. You are not permitted to make up information.
-For instance, the user can ask questions like "What is the candidate's education level?" or
-"How long they have been working in a given field?". Take into account all their job experiences,
-education, and skills when answering questions.
-Use the entire prompt as input to the tool. For instance, if the prompt is
-"Did he complete his MSc studies?", the input should be
-"Did he complete his MSc studies?".
+question_template = """Your job is to answer questions about CVs and resumes based on the below context.
+If the question or input is not related to CVs or resumes please let the user know.
+
 {context}
 """
 
@@ -63,7 +56,7 @@ question_system_prompt = SystemMessagePromptTemplate(
 
 question_human_prompt = HumanMessagePromptTemplate(
     prompt=PromptTemplate(
-        input_variables=["input"], template="{question}"
+        input_variables=["input"], template="{input}"
     )
 )
 
@@ -73,7 +66,7 @@ question_prompt = ChatPromptTemplate(
     input_variables=["context", "input"], messages=messages
 )
 
-retriever = vector_db.as_retriever(k=3)
+retriever = vector_db.as_retriever(k=4)
 
 document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
 
