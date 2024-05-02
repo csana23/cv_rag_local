@@ -4,7 +4,8 @@ from langchain_community.llms import Ollama
 from langchain_community.embeddings import OllamaEmbeddings
 from pydantic import BaseModel
 from async_utils import async_retry
-import requests
+from cv_question_chain import question_vector_chain, client
+from langchain.schema import Document
 
 app = FastAPI(
     title="Test Chatbot",
@@ -15,16 +16,15 @@ class QueryInput(BaseModel):
     text: str
 
 class QueryOutput(BaseModel):
-    text: str
+    input: str
+    context: list[Document]
+    answer: str
 
-llm = Ollama(base_url="http://localhost:11434", model="phi3")
 
 @async_retry(max_retries=10, delay=1)
 async def invoke_agent_with_retry(query: str):
-    #response = llm.invoke(query)
-    #response_text = response["text"]
 
-    return await llm.invoke(query)
+    return question_vector_chain.invoke({"input": query})
 
 @app.get("/")
 async def get_status():
@@ -35,5 +35,6 @@ async def get_status():
 async def query_model(query: QueryInput) -> QueryOutput:
     query_response = await invoke_agent_with_retry(query.text)
     print("query_response", query_response)
+    print("listing chromadb collections from chain:", client.list_collections())
 
-    return query_response
+    return dict(query_response)

@@ -1,8 +1,10 @@
 from pydantic import BaseModel
+from langchain.schema import Document
 
 class CVQueryInput(BaseModel):
     text: str
 
-
 class CVQueryOutput(BaseModel):
-    text: str
+    input: str
+    context: list[Document]
+    answer: str

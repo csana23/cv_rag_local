@@ -10,7 +10,6 @@ dependencies = [
     "langchainhub",
     "chromadb",
     "numpy",
-    "openai",
     "opentelemetry-api",
     "pydantic",
     "uvicorn",

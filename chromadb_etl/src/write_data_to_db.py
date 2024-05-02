@@ -110,7 +110,7 @@ def save_to_chroma(chunks: list[Document]):
     
     for chunk in chunks:
         # embed using ollama
-        response = ollama_client.embeddings(model="phi3", prompt=chunk.page_content)
+        response = ollama_client.embeddings(model="phi3", prompt=chunk.page_content, keep_alive="-1m")
         embedding = response["embedding"]
 
         collection.add(

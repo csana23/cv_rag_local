@@ -18,7 +18,7 @@ async def invoke_agent_with_retry(query: str):
     """
 
     # return await cv_rag_agent_executor.ainvoke({"input": query})
-    return await question_vector_chain.invoke(query) 
+    return await question_vector_chain.invoke({"input": query}) 
 
 
 @app.get("/")

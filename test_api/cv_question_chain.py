@@ -20,9 +20,8 @@ from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 
-url = "0.0.0.0" if os.getenv("LOCAL") == "yes" else "host.docker.internal"
-
-client = chromadb.HttpClient(host=url, port=8000)
+CHROMA_PATH = "../chromadb_etl/src/chroma"
+client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 print("listing chromadb collections from chain:", client.list_collections())
 
@@ -31,16 +30,15 @@ print("listing chromadb collections from chain:", client.list_collections())
 print("this is from the chain")
 print(os.getcwd())
 
-# embedding_function = OllamaEmbeddingFunction(url="http://host.docker.internal:11434", model_name=os.getenv("AGENT_MODEL"))
-embedding_function = OllamaEmbeddings(base_url="http://" + url + ":11434", model="phi3")
+embedding_function = OllamaEmbeddings(base_url="http://localhost:11434", model="phi3")
 
 vector_db = Chroma(
     client=client,
-    collection_name="resume_collection",
+    collection_name="langchain",
     embedding_function=embedding_function
 )
 
-llm = Ollama(base_url="http://" + url + ":11434", model="phi3", keep_alive="-1")
+llm = Ollama(base_url="http://localhost:11434", model="phi3", keep_alive="-1")
 
 question_template = """Your sole job is to answer questions about resumes.
 Use only the following context to answer the questions.
@@ -63,7 +61,7 @@ question_system_prompt = SystemMessagePromptTemplate(
 
 question_human_prompt = HumanMessagePromptTemplate(
     prompt=PromptTemplate(
-        input_variables=["input"], template="{question}"
+        input_variables=["input"], template="{input}"
     )
 )
 
@@ -78,5 +76,3 @@ retriever = vector_db.as_retriever(k=3)
 document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
 
 question_vector_chain = create_retrieval_chain(retriever=retriever, combine_docs_chain=document_chain)
-
-
