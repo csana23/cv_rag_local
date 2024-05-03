@@ -2,6 +2,7 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from langchain.vectorstores.chroma import Chroma
+from langchain_community.llms import Ollama
 import chromadb
 from chromadb.config import Settings
 from chromadb.utils import embedding_functions
@@ -16,13 +17,17 @@ import shutil
 
 CHROMA_PATH = "chroma"
 # normally: data, when test: ../data
-DATA_PATH = "../data"
+DATA_PATH = "data"
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)
     generate_data_store()
+
+    # load llm as well
+    llm = Ollama(base_url="http://host.docker.internal:11435", model=AGENT_MODEL, keep_alive="-1m", temperature=0.0)
+    llm.invoke(input="Hello!")
 
 def get_files_in_directory(directory):
     files = []
@@ -97,12 +102,16 @@ def save_to_chroma(chunks: list[Document]):
 
     ollama_client = ollama.Client(host="http://host.docker.internal:11434")
 
+    ollama_llm_client = ollama.Client(host="http://host.docker.internal:11435")
+
     # check if model is already pulled
     models = [model['name'].replace(":latest", "") for model in ollama_client.list()['models']]
 
-    if AGENT_MODEL not in models:
+    models_llm = [model['name'].replace(":latest", "") for model in ollama_llm_client.list()['models']]
+
+    if AGENT_MODEL not in models_llm:
         print("model does not exist, pulling from ollama")
-        ollama_client.pull(model=AGENT_MODEL)
+        ollama_llm_client.pull(model=AGENT_MODEL)
 
     if EMBEDDING_MODEL not in models:
         print("embedding model does not exist, pulling from ollama")

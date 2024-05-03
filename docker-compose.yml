@@ -42,6 +42,32 @@ services:
       chromadb:
         condition: service_healthy
 
+  ollama_llm:
+    volumes:
+      - ./ollama/ollama:/root/.ollama_llm
+    container_name: ollama_llm
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+    image: ollama/ollama:latest
+    ports:
+      - 11435:11434
+    healthcheck:
+      test: ollama --version || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
   chromadb_etl:
     build:
       context: ./chromadb_etl
@@ -51,6 +77,8 @@ services:
       chromadb:
         condition: service_healthy
       ollama:
+        condition: service_healthy
+      ollama_llm:
         condition: service_healthy
 
   chatbot_api:
@@ -62,7 +90,7 @@ services:
       chromadb_etl:
         condition: service_completed_successfully
     ports:
-      - "8005:8005"
+      - 8005:8005
 
   chatbot_frontend:
     build:
@@ -72,4 +100,4 @@ services:
     depends_on:
       - chatbot_api
     ports:
-      - "8501:8501"
+      - 8501:8501
