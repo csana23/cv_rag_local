@@ -45,9 +45,11 @@ llm = Ollama(base_url="http://host.docker.internal:11434", model=AGENT_MODEL, ke
 
 question_template = """Your job is to answer questions about CVs and resumes based on the below context.
 If the question is not related to the content of a resume, past job experiences or skills, you can say you don't know.
-If the prompt is not a question related to a resume, let the user know. 
-Use the entire prompt to generate your answer.
+If the input is not a question related to a resume, let the user know. 
+Do not provide answers that are not related to the input.
 Keep your answers concise and to the point.
+Do not provide more information than what is asked for.
+If the context is not relevant to the question, you can say you don't know.
 
 {context}
 """
@@ -70,7 +72,7 @@ question_prompt = ChatPromptTemplate(
     input_variables=["context", "input"], messages=messages
 )
 
-retriever = vector_db.as_retriever(search_kwargs={"k": 3})
+retriever = vector_db.as_retriever()
 
 document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
 
