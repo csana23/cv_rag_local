@@ -2,8 +2,8 @@
 name = "chatbot_frontend"
 version = "0.1"
 dependencies = [
-   "requests",
-   "streamlit"
+   "requests==2.31.0",
+   "streamlit==1.33.0"
 ]
 
 [project.optional-dependencies]

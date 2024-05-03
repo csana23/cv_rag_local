@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from async_utils import async_retry
 from cv_question_chain import question_vector_chain, client
 from langchain.schema import Document
+import json
 
 app = FastAPI(
     title="Test Chatbot",

@@ -5,7 +5,6 @@ import streamlit as st
 
 # CHATBOT_URL = os.getenv("CHATBOT_LOCAL_URL") if os.getenv("LOCAL") == "yes" else os.getenv("CHATBOT_DOCKER_URL")
 CHATBOT_URL = os.getenv("CHATBOT_URL", "http://localhost:8005/cv-rag-agent")
-print("CHATBOT_URL", CHATBOT_URL)
 
 with st.sidebar:
     st.header("About")
@@ -28,7 +27,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
-    with st.chat_message(message["answer"]):
+    with st.chat_message(message["role"]):
         if "answer" in message.keys():
             st.markdown(message["answer"])
 
@@ -42,7 +41,6 @@ if prompt := st.chat_input("What do you want to know?"):
     st.session_state.messages.append({"role": "user", "answer": prompt})
 
     data = {"text": prompt}
-    print("prompt:", prompt)
 
     with st.spinner("Searching for an answer..."):
         response = requests.post(CHATBOT_URL, json=data)

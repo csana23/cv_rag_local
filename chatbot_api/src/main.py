@@ -17,7 +17,6 @@ async def invoke_agent_with_retry(query: str):
     are intermittent connection issues to external APIs.
     """
 
-    # return await cv_rag_agent_executor.ainvoke({"input": query})
     return question_vector_chain.invoke({"input": query}) 
 
 
