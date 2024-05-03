@@ -11,20 +11,17 @@ import PyPDF2
 import os
 import shutil
 
-# CHROMA_PATH = os.path.join(os.getcwd(), "../../chroma")
-# DATA_PATH = os.path.join(os.getcwd(), "../../data")
+# docker mode: host.docker.internal
+# local mode: 127.0.0.1
 
 CHROMA_PATH = "chroma"
+# normally: data, when test: 
 DATA_PATH = "data"
-# SRC_PATH = "app/src"
-# FILE_PATH = "write_data_to_db.py"
+AGENT_MODEL = os.getenv("AGENT_MODEL")
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)
     generate_data_store()
-    # check_folder_exists(SRC_PATH)
-    # print(os.getcwd())
-    # print(get_files_in_directory(os.getcwd()))
 
 def get_files_in_directory(directory):
     files = []
@@ -95,22 +92,22 @@ def save_to_chroma(chunks: list[Document]):
     client = chromadb.HttpClient(host="host.docker.internal", port=8000, settings=Settings(allow_reset=True))
     client.reset()
     
-    # embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=os.getenv("OPENAI_API_KEY"))
-    # embedding_function = embedding_functions.OllamaEmbeddingFunction(url="http://localhost:11434", model_name=os.getenv("AGENT_MODEL"))
-    collection = client.create_collection("resume_collection")
+    collection = client.create_collection(name="resume_collection", metadata={"hnsw:space": "cosine"})
 
     ollama_client = ollama.Client(host="http://host.docker.internal:11434")
 
-    # check if phi3 is already pulled
+    # check if model is already pulled
     models = [model['name'] for model in ollama_client.list()['models']]
 
-    if 'phi3:latest' not in models:
+    model_ollama_name = AGENT_MODEL + ":latest"
+
+    if model_ollama_name not in models:
         print("model does not exist, pulling from ollama")
-        ollama_client.pull(model="phi3")
+        ollama_client.pull(model=model_ollama_name)
     
     for chunk in chunks:
         # embed using ollama
-        response = ollama_client.embeddings(model="phi3", prompt=chunk.page_content, keep_alive="-1m")
+        response = ollama_client.embeddings(model=AGENT_MODEL, prompt=chunk.page_content, keep_alive="-1m")
         embedding = response["embedding"]
 
         collection.add(

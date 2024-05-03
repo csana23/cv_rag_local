@@ -30,7 +30,7 @@ print("listing chromadb collections from chain:", client.list_collections())
 print("this is from the chain")
 print(os.getcwd())
 
-embedding_function = OllamaEmbeddings(base_url="http://localhost:11434", model="phi3")
+embedding_function = OllamaEmbeddings(base_url="http://localhost:11434", model=AGENT_MODEL)
 
 vector_db = Chroma(
     client=client,
@@ -38,7 +38,7 @@ vector_db = Chroma(
     embedding_function=embedding_function
 )
 
-llm = Ollama(base_url="http://localhost:11434", model="phi3", keep_alive="-1")
+llm = Ollama(base_url="http://localhost:11434", model=AGENT_MODEL, keep_alive="-1")
 
 question_template = """Your job is to answer questions about CVs and resumes based on the below context.
 If the question or input is not related to CVs or resumes please let the user know.
@@ -64,7 +64,7 @@ question_prompt = ChatPromptTemplate(
     input_variables=["context", "input"], messages=messages
 )
 
-retriever = vector_db.as_retriever(k=3)
+retriever = vector_db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.5})
 
 document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
 
