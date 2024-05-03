@@ -19,11 +19,12 @@ import chromadb
 from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 
 AGENT_MODEL = os.getenv("AGENT_MODEL")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
 # docker mode: host.docker.internal
 # local mode: 127.0.0.1
 
-client = chromadb.HttpClient(host="host.docker.internal", port=8000)
+client = chromadb.HttpClient(host="127.0.0.1", port=8000)
 
 print("listing chromadb collections from chain:", client.list_collections())
 
@@ -32,7 +33,7 @@ print("listing chromadb collections from chain:", client.list_collections())
 print("this is from the chain")
 print(os.getcwd())
 
-embedding_function = OllamaEmbeddings(base_url="http://host.docker.internal:11434", model=AGENT_MODEL)
+embedding_function = OllamaEmbeddings(base_url="http://127.0.0.1:11434", model=EMBEDDING_MODEL)
 
 vector_db = Chroma(
     client=client,
@@ -41,17 +42,28 @@ vector_db = Chroma(
     collection_metadata={"hnsw:space": "cosine"}
 )
 
-llm = Ollama(base_url="http://host.docker.internal:11434", model=AGENT_MODEL, keep_alive="-1", temperature=0.0)
+llm = Ollama(base_url="http://127.0.0.1:11434", model=AGENT_MODEL, keep_alive="-1", temperature=0.0)
 
-question_template = """Your job is to answer questions about CVs and resumes based on the below context.
+old_question_template = """Your sole job is to answer questions about CVs and resumes based on the below context.
 If the question is not related to the content of a resume, past job experiences or skills, you can say you don't know.
 If the input is not a question related to a resume, let the user know. 
 Do not provide answers that are not related to the input.
 Keep your answers concise and to the point.
 Do not provide more information than what is asked for.
 If the context is not relevant to the question, you can say you don't know.
-
 {context}
+"""
+
+question_template = """
+ <s>[INST] Your sole job is to answer questions about CVs and resumes based on the below context.
+If the question is not related to the content of a resume, past job experiences or skills, you can say you don't know.
+If the input is not a question related to a resume, let the user know. 
+Do not provide answers that are not related to the input.
+Keep your answers concise and to the point.
+Do not provide more information than what is asked for.
+If the context is not relevant to the question, you can say you don't know. [/INST] </s>
+Context: {context}
+[/INST]
 """
 
 question_system_prompt = SystemMessagePromptTemplate(
@@ -72,7 +84,7 @@ question_prompt = ChatPromptTemplate(
     input_variables=["context", "input"], messages=messages
 )
 
-retriever = vector_db.as_retriever()
+retriever = vector_db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.3, "k": 3})
 
 document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
 

@@ -15,9 +15,10 @@ import shutil
 # local mode: 127.0.0.1
 
 CHROMA_PATH = "chroma"
-# normally: data, when test: 
-DATA_PATH = "data"
+# normally: data, when test: ../data
+DATA_PATH = "../data"
 AGENT_MODEL = os.getenv("AGENT_MODEL")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
 def main():
     convert_all_pdfs_to_txt(DATA_PATH)
@@ -73,8 +74,8 @@ def load_documents():
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=100,
+        chunk_size=600,
+        chunk_overlap=50,
         length_function=len,
         add_start_index=True,
     )
@@ -97,17 +98,19 @@ def save_to_chroma(chunks: list[Document]):
     ollama_client = ollama.Client(host="http://host.docker.internal:11434")
 
     # check if model is already pulled
-    models = [model['name'] for model in ollama_client.list()['models']]
+    models = [model['name'].replace(":latest", "") for model in ollama_client.list()['models']]
 
-    model_ollama_name = AGENT_MODEL + ":latest"
-
-    if model_ollama_name not in models:
+    if AGENT_MODEL not in models:
         print("model does not exist, pulling from ollama")
-        ollama_client.pull(model=model_ollama_name)
+        ollama_client.pull(model=AGENT_MODEL)
+
+    if EMBEDDING_MODEL not in models:
+        print("embedding model does not exist, pulling from ollama")
+        ollama_client.pull(model=EMBEDDING_MODEL)
     
     for chunk in chunks:
         # embed using ollama
-        response = ollama_client.embeddings(model=AGENT_MODEL, prompt=chunk.page_content, keep_alive="-1m")
+        response = ollama_client.embeddings(model=EMBEDDING_MODEL, prompt=chunk.page_content, keep_alive="-1m")
         embedding = response["embedding"]
 
         collection.add(

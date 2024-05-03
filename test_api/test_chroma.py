@@ -1,28 +1,45 @@
 import chromadb
 import os
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.vectorstores import Chroma
+import ollama
+
+AGENT_MODEL = os.getenv("AGENT_MODEL")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
 client = chromadb.HttpClient(host="127.0.0.1", port=8000)
-
 print("listing chromadb collections from chain:", client.list_collections())
 
-from langchain_community.embeddings import OllamaEmbeddings
-from langchain.vectorstores import Chroma
+""" ollama_client = ollama.Client(host="http://127.0.0.1:11434")
 
-url = "127.0.0.1" if os.getenv("LOCAL") == "yes" else "host.docker.internal"
+models = [model['name'].replace(":latest", "") for model in ollama_client.list()['models']]
 
-# Load your documents (replace 'docs' with your actual document data)
-embedding_function = OllamaEmbeddings(base_url="http://" + url + ":11434", model="phi3")
-docs = ["Document 1", "Document 2", ...]  # Your actual documents
+print(models) """
+
+
+
+embedding_function = OllamaEmbeddings(base_url="http://127.0.0.1:11434", model=EMBEDDING_MODEL)
 
 # Create a ChromaDB instance
 db = Chroma(
     client=client,
     collection_name="resume_collection",
-    embedding_function=embedding_function
+    embedding_function=embedding_function,
+    collection_metadata={"hnsw:space": "cosine"}
 )
 
-# Now, to get all documents from the Chroma database:
-all_documents = db.get()
+query_text = "Did Richard Csanaki complete his MSc studies?"
 
-# Print the IDs, embeddings, and documents
-print("all_documents:", all_documents)
+results = db.similarity_search_with_relevance_scores(
+    query=query_text, 
+    k= 3,
+    score_threshold=0.3
+)
+
+for result in results:
+    print(result)
+    print("\n\n")
+
+
+
+
