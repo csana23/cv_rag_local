@@ -17,7 +17,7 @@ import shutil
 
 CHROMA_PATH = "chroma"
 # docker: data, when test: ../data
-DATA_PATH = "data"
+DATA_PATH = "../data"
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
@@ -26,7 +26,7 @@ def main():
     generate_data_store()
 
     # load llm as well
-    llm = Ollama(base_url="http://host.docker.internal:11435", model=AGENT_MODEL, keep_alive="-1m", temperature=0.0)
+    llm = Ollama(base_url="http://127.0.0.1:11435", model=AGENT_MODEL, keep_alive="-1m", temperature=0.0)
     llm.invoke(input="Hello!")
 
 def get_files_in_directory(directory):
@@ -95,14 +95,14 @@ def split_text(documents: list[Document]):
 
 
 def save_to_chroma(chunks: list[Document]):
-    client = chromadb.HttpClient(host="host.docker.internal", port=8000, settings=Settings(allow_reset=True))
+    client = chromadb.HttpClient(host="127.0.0.1", port=8000, settings=Settings(allow_reset=True))
     client.reset()
     
     collection = client.create_collection(name="resume_collection", metadata={"hnsw:space": "cosine"})
 
-    ollama_client = ollama.Client(host="http://host.docker.internal:11434")
+    ollama_client = ollama.Client(host="http://127.0.0.1:11434")
 
-    ollama_llm_client = ollama.Client(host="http://host.docker.internal:11435")
+    ollama_llm_client = ollama.Client(host="http://127.0.0.1:11435")
 
     # check if model is already pulled
     models = [model['name'].replace(":latest", "") for model in ollama_client.list()['models']]
@@ -122,7 +122,7 @@ def save_to_chroma(chunks: list[Document]):
         response = ollama_client.embeddings(model=EMBEDDING_MODEL, prompt=chunk.page_content, keep_alive="-1m")
         embedding = response["embedding"]
 
-        collection.add(
+        collection.upsert(
             ids=[str(uuid.uuid4())], metadatas=chunk.metadata, embeddings=[embedding], documents=chunk.page_content 
         )
 

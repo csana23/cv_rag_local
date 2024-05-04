@@ -24,6 +24,7 @@ from langchain.chains.query_constructor.base import (
 )
 from langchain.retrievers.self_query.chroma import ChromaTranslator
 from langchain_community.document_loaders import DirectoryLoader
+from ragatouille import RAGPretrainedModel
 
 DATA_PATH = "../chromadb_etl/data"
 
@@ -47,30 +48,6 @@ vector_db = Chroma(
     collection_metadata={"hnsw:space": "cosine"}
 )
 
-def load_documents():
-    loader = DirectoryLoader(DATA_PATH, glob="*.txt")
-    documents = loader.load()
-    return documents
-
-documents = load_documents()
-
-store = InMemoryStore()
-
-child_splitter = RecursiveCharacterTextSplitter(chunk_size=400, add_start_index=True)
-parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, add_start_index=True)
-
-parent_retriever = ParentDocumentRetriever(
-    vectorstore=vector_db,
-    docstore=store,
-    child_splitter=child_splitter,
-    parent_splitter=parent_splitter,
-)
-
-parent_retriever.add_documents(documents, ids=None)
-
-print("invoke parent_retriever...")
-print(parent_retriever.invoke("Does Richard Csanaki or Imre Szucs have a PhD?"))
-
 question_template = """
 [INST] Your sole job is to answer questions about CVs and resumes based on the below context.
 If the question is not related to the content of a resume, past job experiences or skills, you can say you don't know.
@@ -80,9 +57,13 @@ Keep your answers concise and to the point.
 Do not provide more information than what is asked for.
 If the context is not relevant to the question, you can say you don't know.
 If the context contains metadata about the source file, the name of the file might indicate the 
-candidate's name. Take the context's metadata (the file source) into account. Each file contains
-information about one candidate. Do not mix-and-match information from multiple files. [/INST]
-Context: {context}
+candidate's name. You find this in 'source tag' of the context. Take the context's metadata (the file source) into account when 
+answering questions about multiple candidate's at the same time.
+Each file contains information about strictly one candidate. Do not mix-and-match information from multiple files.
+If something is not explicitly mentioned in the candidate's CV/resume, do not infer further information about
+it on your own! Do NOT make assumptions!  [/INST]
+Context: 
+{context}
 """
 
 question_system_prompt = SystemMessagePromptTemplate(
@@ -103,15 +84,36 @@ question_prompt = ChatPromptTemplate(
     input_variables=["context", "input"], messages=messages
 )
 
-retriever = vector_db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.3, "k": 10})
+query = "How would you rate Imre Szucs' skills in data analytics?"
 
-document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
+relevant_docs = vector_db.similarity_search(query=query, k=20)
+relevant_docs = [str((doc.page_content, doc.metadata)) for doc in relevant_docs]
 
-question_vector_chain = create_retrieval_chain(retriever=parent_retriever, combine_docs_chain=document_chain)
+reranker = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 
-result = question_vector_chain.invoke({"input": "Did Richard Csanaki complete his MSc studies?"})
+relevant_docs = reranker.rerank(query, relevant_docs, k=5)
+relevant_docs = [doc["content"] for doc in relevant_docs]
 
-print(result)
+relevant_docs = relevant_docs[:5]
+
+context = "\nExtracted documents:\n"
+context += "".join([f"Document {str(i)}:::\n" + doc for i, doc in enumerate(relevant_docs)])
+
+print("context:\n", context)
+
+# retriever = vector_db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.35, "k": 5})
+
+# document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
+
+question_prompt = question_prompt.format(context=context, input=query)
+
+answer = llm.invoke(question_prompt)
+
+print(answer)
+
+# question_vector_chain = create_retrieval_chain(retriever=retriever, combine_docs_chain=document_chain)
+
+# result = question_vector_chain.invoke({"input": "Did Richard Csanaki complete his MSc studies?"})
 
 """
 query_text = "Did Richard Csanaki complete his MSc studies?"
