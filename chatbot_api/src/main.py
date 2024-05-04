@@ -1,5 +1,5 @@
 # from agents.cv_rag_agent import cv_rag_agent_executor
-from chains.cv_question_chain import question_vector_chain
+from chains.cv_question_chain import ChainBuilder
 from fastapi import FastAPI
 from models.cv_rag_query import CVQueryInput, CVQueryOutput
 from utils.async_utils import async_retry
@@ -9,6 +9,7 @@ app = FastAPI(
     description="Endpoints for a CV RAG chatbot",
 )
 
+chain_builder = ChainBuilder(host="host.docker.internal")
 
 @async_retry(max_retries=10, delay=1)
 async def invoke_agent_with_retry(query: str):
@@ -17,7 +18,7 @@ async def invoke_agent_with_retry(query: str):
     are intermittent connection issues to external APIs.
     """
 
-    return question_vector_chain.invoke({"input": query}) 
+    return chain_builder.process_question(query)
 
 
 @app.get("/")

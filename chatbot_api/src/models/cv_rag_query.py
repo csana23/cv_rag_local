@@ -6,5 +6,5 @@ class CVQueryInput(BaseModel):
 
 class CVQueryOutput(BaseModel):
     input: str
-    context: list[Document]
+    context: str
     answer: str
