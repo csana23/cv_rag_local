@@ -1,5 +1,9 @@
 # cv_rag_local
-a repo for a rag project with a local model
+a repo for a rag project with a local model served by ollama
+- backend: FastAPI, pydantic
+- LLM stuff: llama3 in ollama, nomic-embed-text embedding model in other ollama instance, ColBERT reranking for RAG precision
+- chromadb vector database
+- streamlit frontend
 
 demo link: https://www.youtube.com/watch?v=M--grymJ7ic
 
