@@ -16,7 +16,7 @@ import shutil
 # local mode: 127.0.0.1
 
 CHROMA_PATH = "chroma"
-# normally: data, when test: ../data
+# docker: data, when test: ../data
 DATA_PATH = "data"
 AGENT_MODEL = os.getenv("AGENT_MODEL")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
