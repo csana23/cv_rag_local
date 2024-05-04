@@ -1,4 +1,4 @@
-DATA_PATH = "../chromadb_etl/data/Richard_csanaki_CV.txt"
+DATA_PATH = "../chromadb_etl/data/Imre_Szucs_CV.txt"
 
 def count_words(filepath: str) -> int:
     try:

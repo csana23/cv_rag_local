@@ -52,7 +52,24 @@ def load_documents():
     documents = loader.load()
     return documents
 
-documents = load_documents(DATA_PATH)
+documents = load_documents()
+
+store = InMemoryStore()
+
+child_splitter = RecursiveCharacterTextSplitter(chunk_size=400, add_start_index=True)
+parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, add_start_index=True)
+
+parent_retriever = ParentDocumentRetriever(
+    vectorstore=vector_db,
+    docstore=store,
+    child_splitter=child_splitter,
+    parent_splitter=parent_splitter,
+)
+
+parent_retriever.add_documents(documents, ids=None)
+
+print("invoke parent_retriever...")
+print(parent_retriever.invoke("Does Richard Csanaki or Imre Szucs have a PhD?"))
 
 question_template = """
 [INST] Your sole job is to answer questions about CVs and resumes based on the below context.
@@ -90,8 +107,11 @@ retriever = vector_db.as_retriever(search_type="similarity_score_threshold", sea
 
 document_chain = create_stuff_documents_chain(llm=llm, prompt=question_prompt)
 
-question_vector_chain = create_retrieval_chain(retriever=retriever, combine_docs_chain=document_chain)
+question_vector_chain = create_retrieval_chain(retriever=parent_retriever, combine_docs_chain=document_chain)
 
+result = question_vector_chain.invoke({"input": "Did Richard Csanaki complete his MSc studies?"})
+
+print(result)
 
 """
 query_text = "Did Richard Csanaki complete his MSc studies?"
