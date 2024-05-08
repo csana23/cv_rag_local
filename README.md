@@ -4,6 +4,7 @@ a repo for a rag project with a local model served by ollama
 - LLM stuff: llama3 in ollama, nomic-embed-text embedding model in other ollama instance, ColBERT reranking for RAG precision
 - chromadb vector database
 - streamlit frontend
+- deployed as a docker container
 
 demo link: https://www.youtube.com/watch?v=M--grymJ7ic
 
