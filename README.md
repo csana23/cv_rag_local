@@ -1,5 +1,5 @@
 # cv_rag_local
-a repo for a rag project with a local model served by ollama
+An LLM-based RAG project that enables users to ask questions about the content of multiple candidates' CVs/resumes: their work experience, skills, other elements of their professional career and comparison to other candidates
 - llama3 as LLM and nomic-embed-text as embedding model, both running in separate ollama instances
 - chromadb vector database for storing user input-, and PDF file embeddings, running in server mode
 - RAG component with cosine similarity search followed by ColBERT reranking and metadata inclusion in retrieved document chunks
