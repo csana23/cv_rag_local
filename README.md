@@ -1,10 +1,12 @@
 # cv_rag_local
 a repo for a rag project with a local model served by ollama
-- backend: FastAPI, pydantic
-- LLM stuff: llama3 in ollama, nomic-embed-text embedding model in other ollama instance, ColBERT reranking for RAG precision
-- chromadb vector database
-- streamlit frontend
-- deployed as a docker container
+- llama3 as LLM and nomic-embed-text as embedding model, both running in separate ollama instances
+- chromadb vector database for storing user input-, and PDF file embeddings, running in server mode
+- RAG component with cosine similarity search followed by ColBERT reranking and metadata inclusion in retrieved document chunks
+- FastAPI backend to process user prompts and initiate LangChain process
+- Streamlit frontend
+- deployed as a Docker container, able to utilize Nvidia GPUs
+- also available with OpenAI's gpt-3.5 model with added LangChain agent functions
 
 demo link: https://www.youtube.com/watch?v=M--grymJ7ic
 
